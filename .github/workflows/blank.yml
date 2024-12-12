@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Cria o diretório dist se não existir
+      - name: Create dist directory
+        run: mkdir -p dist
+
+      # Gera a animação da cobra com base nos commits
+      - name: Generate Snake GIF and SVG
+        uses: Platane/snk@v3
+        with:
+          github_user_name: ${{ github.repository_owner }}
+          outputs: |
+            dist/github-snake.svg
+            dist/github-snake-dark.svg?palette=github-dark
+            dist/ocean.gif?color_snake=orange&color_dots=#bfd6f6,#8dbdff,#64a1f4,#4b91f1,#3c7dd9
+
+      # Commit e push dos arquivos gerados
+      - name: Commit and push generated snake files
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add dist/github-snake.svg dist/github-snake-dark.svg dist/ocean.gif
+          git commit -m "Add generated snake files"
+          git push
